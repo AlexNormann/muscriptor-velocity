@@ -7,7 +7,7 @@ so that when transcribing audio the MIDI **preserves note velocity (loudness)**.
 Original project: [https://github.com/muscriptor/muscriptor](https://github.com/muscriptor/muscriptor)
 (MIT, authors Kyutai x Mirelo).
 
-## Repository structure
+## Repository structure 
 
 ```
 muscriptor-velocity/
