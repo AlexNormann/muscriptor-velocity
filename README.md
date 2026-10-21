@@ -53,16 +53,16 @@ muscriptor/                     # корень оригинального реп
 громкости, **наложи содержимое папки `muscriptor/` на пакет оригинала**
 (перезапиши `muscriptor/muscriptor/`):
 
-Windows (cmd), из корня, где лежат оба репозитория:
+Windows (cmd), выполняй из корня этого репозитория; `<оригинальный проект>` — путь к папке оригинального репозитория:
 
 ```bat
-robocopy "D:\PycharmProjects\muscriptor\muscriptor-velocity\muscriptor" "D:\PycharmProjects\muscriptor\muscriptor\muscriptor" /E
+robocopy ".\muscriptor" "<оригинальный проект>\muscriptor" /E
 ```
 
-PowerShell:
+PowerShell (из корня этого репозитория):
 
 ```powershell
-Copy-Item -Recurse -Force "D:\PycharmProjects\muscriptor\muscriptor-velocity\muscriptor\*" "D:\PycharmProjects\muscriptor\muscriptor\muscriptor\"
+Copy-Item -Recurse -Force ".\muscriptor\*" "<оригинальный проект>\muscriptor\"
 ```
 
 Linux/WSL:
@@ -82,7 +82,7 @@ rsync -a ./muscriptor/ /path/to/original/muscriptor/muscriptor/
   переустановить:
 
   ```bat
-  cd D:\PycharmProjects\muscriptor\muscriptor
+  cd <оригинальный проект>
   .venv\Scripts\python.exe -m pip install -e .
   ```
 - Нужны те же зависимости, что у оригинала (torch, numpy, mido, einops,
