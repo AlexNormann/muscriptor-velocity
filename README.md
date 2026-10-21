@@ -1,68 +1,69 @@
 # muscriptor-velocity
 
-**muscriptor** — транскрибация аудио в MIDI и ноты на основе трансформера
-(MT3). Этот репозиторий — тот же пакет `muscriptor/`, доработанный так, чтобы
-при распознавании аудио в MIDI **сохранялась громкость нот (velocity)**.
+**muscriptor** — audio-to-MIDI and sheet-music transcription using a transformer
+language model (MT3). This repository is the same `muscriptor/` package, modified
+so that when transcribing audio the MIDI **preserves note velocity (loudness)**.
 
-Оригинальный проект: [https://github.com/muscriptor/muscriptor](https://github.com/muscriptor/muscriptor)
-(MIT, авторы Kyutai x Mirelo).
+Original project: [https://github.com/muscriptor/muscriptor](https://github.com/muscriptor/muscriptor)
+(MIT, authors Kyutai x Mirelo).
 
-## Структура репозитория
+## Repository structure
 
 ```
 muscriptor-velocity/
-├─ muscriptor/            # Python-пакет (с фиксом velocity)
+├─ muscriptor/            # Python package (with the velocity fix)
 │  ├─ tokenizer/  utils/  models/  modules/
 │  └─ transcription_model.py  main.py  server.py  ...
-├─ pyproject.toml         # метаданные пакета (совпадает с оригиналом)
+├─ pyproject.toml         # package metadata (same as the original)
 ├─ LICENSE                # MIT (Kyutai x Mirelo)
 └─ README.md
 ```
 
-## Что изменено (velocity)
+## What changed (velocity)
 
-Модель MT3 предсказывает только on/off нот (`velocity` — бинарный гейт 1/0),
-а `note_event2midi` писал всем нотам одно значение (100). Реализовано извлечение
-реальной громкости из аудио в момент атаки ноты:
+The MT3 model only predicts note on/off (`velocity` — a binary gate 0/1), and
+`note_event2midi` wrote one single value (100) for every note. Real loudness is
+now derived from the audio at the note's onset:
 
-- `muscriptor/utils/velocity.py` — новый модуль: окно ~30 мс на атаке ноты,
-  FFT (n_fft=2048) в полосе частоты питча, энергия → dB относительно самой
-  громкой ноты → масштаб 1..127 (громкая ~115, тише — линейно вниз по dB).
-  Включает фикс переноса CUDA-тензора в CPU (`.detach().cpu()`), чтобы оценка
-  работала на GPU.
+- `muscriptor/utils/velocity.py` — new module: a ~30 ms window at the note's
+  onset, FFT (n_fft=2048) in the note's pitch band, energy → dB relative to the
+  loudest note → scale 1..127 (loud ~115, quieter — linear down per dB). Includes
+  a fix that moves a CUDA tensor to CPU (`.detach().cpu()`) so the estimate works
+  on GPU.
 - `muscriptor/tokenizer/notes.py` — `Note.velocity` / `NoteEvent.note_velocity`;
-  `note2note_event` переносит громкость, `note_event2midi` пишет её в note_on
-  (с фолбэком на 100), `note_event2note` сохраняет при обратном декодировании.
+  `note2note_event` carries the velocity, `note_event2midi` writes it into note_on
+  (falling back to 100), `note_event2note` keeps it when decoding back.
 - `muscriptor/transcription_model.py` — `events_to_midi_bytes(..., audio=None)`
-  считает velocity из аудио; `transcribe_and_postprocess` прокидывает audio.
-- `muscriptor/server.py` — `/transcribe` передаёт `(wav, sr)` в конвейер.
+  computes velocity from audio; `transcribe_and_postprocess` passes audio through.
+- `muscriptor/server.py` — `/transcribe` passes `(wav, sr)` into the pipeline.
 
-## Как наложить этот diff на оригинальный проект
+## How to apply this diff to the original project
 
-Оригинальный проект имеет структуру:
+The original project has this structure:
 
 ```
-muscriptor/                     # корень оригинального репозитория
+muscriptor/                     # root of the original repository
 ├─ pyproject.toml
-├─ muscriptor/                  # пакет
+├─ muscriptor/                  # package
 │  ├─ tokenizer/  utils/  ...
 ├─ tests/  web/  ...
 ```
 
-Пакет в этом репозитории — папка `muscriptor/`. Чтобы применить изменение
-громкости, **наложи содержимое папки `muscriptor/` на пакет оригинала**
-(перезапиши `muscriptor/muscriptor/`):
+The package in this repository is the `muscriptor/` folder. To apply the velocity
+change, **overlay the contents of the `muscriptor/` folder onto the original
+package** (overwrite `muscriptor/muscriptor/`):
 
-Windows (cmd), выполняй из корня этого репозитория; `<оригинальный проект>` — путь к папке оригинального репозитория:
+Windows (cmd), run from the root of this repository; `<original project>` is the
+path to the folder that holds the original repository:
 
 ```bat
-robocopy ".\muscriptor" "<оригинальный проект>\muscriptor" /E
+robocopy ".\muscriptor" "<original project>\muscriptor" /E
 ```
 
-PowerShell (из корня этого репозитория):
+PowerShell (from the root of this repository):
 
 ```powershell
-Copy-Item -Recurse -Force ".\muscriptor\*" "<оригинальный проект>\muscriptor\"
+Copy-Item -Recurse -Force ".\muscriptor\*" "<original project>\muscriptor\"
 ```
 
 Linux/WSL:
@@ -71,55 +72,50 @@ Linux/WSL:
 rsync -a ./muscriptor/ /path/to/original/muscriptor/muscriptor/
 ```
 
-Важно:
+Important:
 
-- **Копировать нужно именно папку `muscriptor/` (пакет), а не весь репозиторий.**
-  `README.md`, `LICENSE` и `pyproject.toml` этого репозитория — про сам
-  репозиторий; в оригинале они уже есть (там свои `pyproject/LICENSE/README`),
-  ничем их из этого diff'а не перезаписывай.
-- Оригинальный проект обычно установлен editable (`pip install -e .`), поэтому
-  после наложения пакета правки подхватываются сразу. Для надёжности можно
-  переустановить:
+- **Copy the `muscriptor/` folder (the package) only, not the whole repository.**
+  This repository's `README.md`, `LICENSE` and `pyproject.toml` are about this
+  repo; the original already has its own (`pyproject/LICENSE/README`), don't
+  overwrite them with this diff.
+- The original project is usually installed editable (`pip install -e .`), so the
+  changes are picked up immediately after overlaying the package. For safety you
+  can reinstall:
 
   ```bat
-  cd <оригинальный проект>
+  cd <original project>
   .venv\Scripts\python.exe -m pip install -e .
   ```
-- Нужны те же зависимости, что у оригинала (torch, numpy, mido, einops,
-  safetensors, beat-this и т.д.) — они уже есть в оригинальном проекте.
-- Модель `large` gated на HuggingFace; скачай вручную `model.safetensors` +
-  `config.json` и передай путь через `--model` (иначе `--model large` → 401).
+- The same dependencies as the original are needed (torch, numpy, mido, einops,
+  safetensors, beat-this, etc.) — they are already present in the original project.
+- The `large` model is gated on HuggingFace; download `model.safetensors` +
+  `config.json` manually and pass the path via `--model` (otherwise
+  `--model large` → 401).
 
-## Запуск
+## Run
 
-Установка (из этого репозитория):
+Install (from this repository):
 
 ```bat
 pip install -e .
 ```
 
-Транскрибация:
+Transcribe:
 
 ```bat
 muscriptor transcribe input.wav -o output.mid --device cuda
 ```
 
-Сервер (веб-UI):
+Server (web UI):
 
 ```bat
 muscriptor serve --device cuda
 ```
 
-> На русской Windows (кодировка cp1251) запускай с `chcp 65001` +
-> `PYTHONUTF8=1`, иначе падает `UnicodeEncodeError` на символах `×`, `…`, `→`.
+> On Russian Windows (cp1251 codepage) run with `chcp 65001` + `PYTHONUTF8=1`,
+> otherwise `UnicodeEncodeError` on `×`, `…`, `→`.
 
-Пример запуска через PowerShell с аргументами
-```powershell
-cd /path/to/muscriptor
-& ".\.venv\Scripts\muscriptor.exe" serve --model "D:\muscriptor\weights\muscriptor-large\model.safetensors" --device cuda
-```
-
-## Проверка, что velocity сохраняется
+## Verify that velocity is preserved
 
 ```python
 from mido import MidiFile
@@ -127,5 +123,4 @@ print([(x.note, x.velocity) for x in MidiFile('output.mid')
        if x.type == 'note_on' and x.velocity > 0])
 ```
 
-В исправленном выводе значения **различаются** (например 115, 98, 86...),
-а не все 100.
+In the fixed output the values **differ** (e.g. 115, 98, 86...), not all 100.
