@@ -113,6 +113,11 @@ muscriptor serve --device cuda
 > На русской Windows (кодировка cp1251) запускай с `chcp 65001` +
 > `PYTHONUTF8=1`, иначе падает `UnicodeEncodeError` на символах `×`, `…`, `→`.
 
+Пример запуска через PowerShell с аргументами
+```powershell
+& ".\.venv\Scripts\muscriptor.exe" serve --model "D:\muscriptor\weights\muscriptor-large\model.safetensors" --device cuda
+```
+
 ## Проверка, что velocity сохраняется
 
 ```python
