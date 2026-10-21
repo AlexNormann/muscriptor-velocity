@@ -115,6 +115,7 @@ muscriptor serve --device cuda
 
 Пример запуска через PowerShell с аргументами
 ```powershell
+cd /path/to/muscriptor
 & ".\.venv\Scripts\muscriptor.exe" serve --model "D:\muscriptor\weights\muscriptor-large\model.safetensors" --device cuda
 ```
 
