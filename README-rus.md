@@ -7,7 +7,7 @@
 Оригинальный проект: [https://github.com/muscriptor/muscriptor](https://github.com/muscriptor/muscriptor)
 (MIT, авторы Kyutai x Mirelo).
 
-## Структура репозитория
+## Структура репозитория 
 
 ```
 muscriptor-velocity/
