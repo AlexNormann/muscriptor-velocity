@@ -110,6 +110,13 @@ muscriptor transcribe input.wav -o output.mid --device cuda
 muscriptor serve --device cuda
 ```
 
+Запуск через PowerShell с параметрами:
+
+```powershell
+cd D:\muscriptor
+& ".\.venv\Scripts\muscriptor.exe" serve --model "D:\muscriptor\weights\muscriptor-large\model.safetensors" --device cuda
+```
+
 > На русской Windows (кодировка cp1251) запускай с `chcp 65001` +
 > `PYTHONUTF8=1`, иначе падает `UnicodeEncodeError` на символах `×`, `…`, `→`.
 

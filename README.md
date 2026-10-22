@@ -112,6 +112,13 @@ Server (web UI):
 muscriptor serve --device cuda
 ```
 
+Запуск через PowerShell с параметрами:
+
+```powershell
+cd D:\muscriptor
+& ".\.venv\Scripts\muscriptor.exe" serve --model "D:\muscriptor\weights\muscriptor-large\model.safetensors" --device cuda
+```
+
 > On Russian Windows (cp1251 codepage) run with `chcp 65001` + `PYTHONUTF8=1`,
 > otherwise `UnicodeEncodeError` on `×`, `…`, `→`.
 
