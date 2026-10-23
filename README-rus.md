@@ -1,3 +1,4 @@
+[English](README.md) | **Русский**
 # muscriptor-velocity
 
 **muscriptor** — транскрибация аудио в MIDI и ноты на основе трансформера
