@@ -1,3 +1,4 @@
+**English** | [Русский](README-rus.md)
 # muscriptor-velocity
 
 **muscriptor** — audio-to-MIDI and sheet-music transcription using a transformer
